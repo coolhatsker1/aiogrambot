@@ -8,23 +8,20 @@ from aiogram.filters import CommandStart
 from aiogram.types import Message
 from aiogram.utils.markdown import hbold
 
+from settings import settings
+from handlers.func import command_start_handler
 
-TOKEN = ('6923389276:AAHGSsFkJrH2SN_OcgA9keYQOcCP-brvx2E')
+TOKEN = settings.bots.bot_token
 
 dp = Dispatcher()
 
-
-@dp.message(CommandStart())
-async def command_start_handler(message: Message) -> None:
-    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
 
 
 async def main() -> None:
     # Initialize Bot instance with a default parse mode which will be passed to all API calls
     bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
-    # And the run events dispatching
+    dp.message.register(command_start_handler)
     await dp.start_polling(bot)
-
 
 
 
