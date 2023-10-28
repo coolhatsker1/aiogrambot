@@ -1,5 +1,5 @@
-from aiogram.types import Message
-from aiogram.utils.markdown import hbold
+from aiogram.client import bot
+from aiogram.types import Message, file
 
-async def command_start_handler(message: Message) -> None:
-    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
+
+

@@ -2,27 +2,30 @@ import asyncio
 import logging
 import sys
 
-from aiogram import Bot, Dispatcher, Router, types
-from aiogram.enums import ParseMode
-from aiogram.filters import CommandStart
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.utils.markdown import hbold
-
 from settings import settings
-from handlers.func import command_start_handler
 
 TOKEN = settings.bots.bot_token
-
+bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
 
+async def command_start_handler(message: Message) -> None:
+    await message.answer(f"Hello, {hbold(message.from_user.full_name)}!")
+
+
+async def message_handler(message: Message) -> None:
+    file_id = message.document.file_id
+    file = await bot.get_file(file_id)
+    file_path = file.file_path
+    await bot.download_file(file_path, destination="C:/my_folder/arcihvebot/downloads/test.7z")
 
 async def main() -> None:
-    # Initialize Bot instance with a default parse mode which will be passed to all API calls
-    bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
-    dp.message.register(command_start_handler)
-    await dp.start_polling(bot)
 
+    dp.message.register(message_handler)
+    await dp.start_polling(bot)
 
 
 if __name__ == "__main__":
