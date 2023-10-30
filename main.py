@@ -37,29 +37,33 @@ async def extract_archive(archive_file, output_dir):
 async def process_files(input_dir, output_file):
     # Open the output file for appending in UTF-8 encoding
     async with aiofiles.open(output_file, 'a', encoding='utf-8') as output:
-        # Iterate through the files in the input directory
-        for filename in os.listdir(input_dir):
-            input_file = os.path.join(input_dir, filename)
-            # Open the input file in binary mode to read its content
-            with open(input_file, 'rb') as file:
-                data = file.read()
-                # Detect the encoding of the file's content using chardet
-                detected_encoding = chardet.detect(data)
-                # Check if the detected encoding is confident enough (confidence > 0.5)
-                if detected_encoding['confidence'] > 0.5:
-                    encoding = detected_encoding['encoding']
-                    # Open the input file again with the detected encoding
-                    async with aiofiles.open(input_file, 'r', encoding=encoding) as input:
-                        lines = await input.readlines()
-                        if lines:
-                            first_line = lines[0]
-                            # Get the file extension (type) from the filename
-                            file_extension = os.path.splitext(filename)[1]
-                            # Add the file extension to the first line
-                            modified_first_line = f"{first_line.strip()} {file_extension}\n"
-                            # Write the modified line to the output file
-                            await output.write(modified_first_line)
+        # Iterate through the files and subdirectories in the input directory
+        for root, dirs, files in os.walk(input_dir):
+            for filename in files:
+                input_file = os.path.join(root, filename)
 
+                try:
+                    # Open the input file in binary mode to read its content
+                    with open(input_file, 'rb') as file:
+                        data = file.read()
+                        # Detect the encoding of the file's content using chardet
+                        detected_encoding = chardet.detect(data)
+                        # Check if the detected encoding is confident enough (confidence > 0.5)
+                        if detected_encoding['confidence'] > 0.5:
+                            encoding = detected_encoding['encoding']
+                            # Open the input file again with the detected encoding
+                            async with aiofiles.open(input_file, 'r', encoding=encoding) as input:
+                                lines = await input.readlines()
+                                if lines:
+                                    first_line = lines[0]
+                                    # Get the file extension (type) from the filename
+                                    file_extension = os.path.splitext(filename)[1]
+                                    # Add the file extension to the first line
+                                    modified_first_line = f"{first_line.strip()} {file_extension}\n"
+                                    # Write the modified line to the output file
+                                    await output.write(modified_first_line)
+                except Exception as e:
+                    print(f"Error processing {input_file}: {str(e)}")
 
 # Function to handle incoming documents
 async def message_handler(message: Message) -> None:
